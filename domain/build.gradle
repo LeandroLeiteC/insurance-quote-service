@@ -1,0 +1,29 @@
+plugins {
+    id 'java-conventions'
+    id 'java-library'
+}
+
+
+group = 'br.com.itau.insurance_quote.domain'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
+
+configurations {
+    testClasses {
+        extendsFrom(testImplementation)
+    }
+}
+
+task testJar(type: Jar) {
+    archiveClassifier.set('test')
+    from sourceSets.test.output
+}
+
+artifacts {
+    testClasses testJar
+}
