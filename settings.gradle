@@ -1,0 +1,4 @@
+rootProject.name = 'insurance-quote-service'
+include 'domain'
+include 'application'
+include 'infrastructure'
