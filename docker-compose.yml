@@ -1,0 +1,109 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      wiremock:
+        condition: service_started
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    volumes:
+      - ./docker/collector/otel-collector.yaml:/etc/otelcol-contrib/config.yaml
+    restart: always
+    ports:
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=tempoSearch,tempoServiceGraph,tempoApmTable
+    volumes:
+      - ./docker/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./docker/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+    restart: always
+    ports:
+      - "3000:3000"
+
+  wiremock:
+    image: "wiremock/wiremock:latest"
+    container_name: wiremock
+    restart: always
+    ports:
+      - "8181:8080"
+    volumes:
+      - ./mappings:/home/wiremock/mappings
+    entrypoint: [ "/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--verbose" ]
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+        POSTGRES_PASSWORD: 123456
+        POSTGRES_DB: insurance_quote_db
+    ports:
+      - "5432:5432"
+
+  rabbitmq:
+    container_name: insurance_quote_rabbitmq
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=ITAU
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=123456
+      - RABBITMQ_DEFAULT_VHOST=/
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 3s
+      timeout: 30s
+      retries: 3
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --enable-feature=exemplar-storage
+      - --web.enable-remote-write-receiver
+    restart: always
+    ports:
+      - '9090:9090'
+
+  loki:
+    container_name: loki
+    image: grafana/loki:3.2.0
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: always
+    ports:
+      - "3100:3100"
+
+  tempo:
+    image: grafana/tempo
+    command: -config.file=/etc/tempo.yaml
+    volumes:
+      - ./docker/tempo/tempo-config.yaml:/etc/tempo.yaml
+    restart: always
+    ports:
+      - "3200:3200"
+      - "4317"

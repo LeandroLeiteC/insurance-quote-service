@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/products/54ea878a-ae41-4538-936b-4d8b57e66749"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "1b2da7cc-b367-4196-8a78-9cfeec21f587",
+      "name": "Seguro de Vida",
+      "created_at": "2021-07-01T00:00:00Z",
+      "active": false,
+      "offers": [
+        "57493ce9-0d07-4dcc-a2bd-c093b67bbfa9",
+        "bdc56d77-348c-4bf0-908f-22d402ee715c",
+        "cdc56d77-348c-4bf0-908f-22d402ee715c"
+      ]
+    }
+  }
+}

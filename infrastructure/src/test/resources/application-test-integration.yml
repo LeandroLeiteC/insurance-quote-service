@@ -1,0 +1,18 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  jpa:
+    show-sql: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: root
+    password: 123456
+    url: jdbc:h2:mem:insurance_quote_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+
+catalog_service:
+  url: wiremock-overrides
+
+otel:
+  sdk:
+    disabled: true

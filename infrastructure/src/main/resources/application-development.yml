@@ -1,0 +1,20 @@
+amqp:
+  admin:
+    auto-create: true
+  host: localhost
+  port: 5672
+  username: insurance_quote_service
+  password: 123456
+
+postgres:
+  username: postgres
+  password: 123456
+  schema: insurance_quote_db
+  url: localhost:5432
+
+catalog_service:
+  url: http://localhost:9090
+
+spring:
+  jpa:
+    show-sql: true

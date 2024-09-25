@@ -1,0 +1,84 @@
+plugins {
+    id 'java-conventions'
+    id 'jacoco-report-aggregation'
+    id 'application'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'br.com.itau.insurance_quote.infrastructure'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+ext {
+    set('springCloudVersion', "2023.0.3")
+}
+
+repositories {
+    mavenCentral()
+}
+
+bootJar {
+    archiveFileName = "application.jar"
+    destinationDirectory.set(file("${rootProject.buildDir}/libs"))
+}
+
+dependencies {
+    implementation(project(':domain'))
+    implementation(project(':application'))
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation('com.fasterxml.jackson.module:jackson-module-afterburner')
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.springframework.amqp:spring-rabbit-test'
+    testImplementation 'com.maciejwalkowiak.spring:wiremock-spring-boot:2.1.2'
+    testImplementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-14'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly('com.h2database:h2')
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+testCodeCoverageReport {
+    reports {
+        xml {
+            enabled true
+            destination file("$rootDir/build/reports/jacoco/test/jacocoTestReport.xml")
+        }
+
+        html {
+            enabled true
+            destination file("$rootDir/build/reports/jacoco/test/")
+        }
+    }
+}
+
+tasks.named("jacocoTestReport") {
+    dependsOn tasks.named("testCodeCoverageReport", JacocoReport)
+}

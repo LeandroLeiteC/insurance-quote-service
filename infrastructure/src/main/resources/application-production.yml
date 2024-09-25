@@ -1,0 +1,17 @@
+amqp:
+  host: ${AMQP_RABBIT_HOST}
+  port: ${AMQP_RABBIT_PORT}
+  username: ${AMQP_RABBIT_USERNAME}
+  password: ${AMQP_RABBIT_PASSWORD}
+
+postgres:
+  username: ${DATABASE_POSTGRES_USERNAME}
+  password: ${DATABASE_POSTGRES_PASSWORD}
+  schema: insurance_quote_db
+  url: ${DATABASE_POSTGRES_URL}
+
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
